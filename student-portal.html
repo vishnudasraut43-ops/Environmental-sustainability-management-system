@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Portal</title>
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 4px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+    }
+    .toast.show {
+      transform: translateX(0);
+    }
+    .toast.success {
+      background-color: #10B981;
+    }
+    .toast.error {
+      background-color: #EF4444;
+    }
+    .toast.info {
+      background-color: #3B82F6;
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .status-pending {
+      background-color: #FEF3C7;
+      color: #92400E;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .status-approved {
+      background-color: #D1FAE5;
+      color: #065F46;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .status-rejected {
+      background-color: #FEE2E2;
+      color: #991B1B;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+
+  <!-- REGISTRATION SECTION (for new students) -->
+  <div id="registration-section" class="hidden flex justify-center items-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md fade-in">
+      <h2 class="text-2xl font-bold text-center text-indigo-600 mb-6">Student Registration</h2>
+
+      <form id="registrationForm">
+        <div class="mb-4">
+          <label for="reg-name" class="block text-gray-700 font-medium mb-2">Full Name</label>
+          <input type="text" id="reg-name" name="name" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Enter your full name" required>
+        </div>
+        <div class="mb-4">
+          <label for="reg-rollno" class="block text-gray-700 font-medium mb-2">Roll Number</label>
+          <input type="text" id="reg-rollno" name="rollno" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Enter your roll number" required>
+        </div>
+        <div class="mb-4">
+          <label for="reg-email" class="block text-gray-700 font-medium mb-2">Email</label>
+          <input type="email" id="reg-email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Enter your email" required>
+        </div>
+        <div class="mb-4">
+          <label for="reg-username" class="block text-gray-700 font-medium mb-2">Username</label>
+          <input type="text" id="reg-username" name="username" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Choose a username" required>
+        </div>
+        <div class="mb-6">
+          <label for="reg-password" class="block text-gray-700 font-medium mb-2">Password</label>
+          <input type="password" id="reg-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Create a password" required>
+        </div>
+        <button type="submit" class="w-full bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 transition duration-200">Register</button>
+      </form>
+
+      <p class="text-center mt-4 text-sm">
+        Already have an account? 
+        <a href="#" id="show-login-from-reg" class="text-indigo-500 hover:underline">Login here</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- LOGIN SECTION (for returning students) -->
+  <div id="login-section" class="hidden flex justify-center items-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md fade-in">
+      <h2 class="text-2xl font-bold text-center text-indigo-600 mb-6">Student Login</h2>
+
+      <form id="loginForm">
+        <div class="mb-4">
+          <label for="login-username" class="block text-gray-700 font-medium mb-2">Username</label>
+          <input type="text" id="login-username" name="username" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Enter your username" required>
+        </div>
+        <div class="mb-6">
+          <label for="login-password" class="block text-gray-700 font-medium mb-2">Password</label>
+          <input type="password" id="login-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="w-full bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 transition duration-200">Login</button>
+      </form>
+
+      <p class="text-center mt-4 text-sm">
+        New student? 
+        <a href="#" id="show-reg-from-login" class="text-indigo-500 hover:underline">Register here</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- WELCOME SECTION (after successful login) -->
+  <div id="welcome-section" class="hidden flex flex-col items-center justify-center min-h-screen py-8 fade-in">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
+      <h2 class="text-2xl font-bold text-center text-indigo-600 mb-2">Welcome back, <span id="student-name"></span>!</h2>
+      <p class="text-center text-gray-600 mb-6">Roll No: <span id="student-rollno"></span></p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Application Options -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Submit Applications</h3>
+          <a href="leave-application.html" class="block bg-indigo-500 text-white py-3 rounded hover:bg-indigo-600 transition text-center">Leave Application</a>
+          <a href="getpass-application.html" class="block bg-green-500 text-white py-3 rounded hover:bg-green-600 transition text-center">Get Pass</a>
+          <a href="bonafide-application.html" class="block bg-yellow-500 text-white py-3 rounded hover:bg-yellow-600 transition text-center">Bonafide Certificate</a>
+        </div>
+        
+        <!-- Application Status -->
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Application Status</h3>
+            <button id="refresh-status" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded text-sm hover:bg-indigo-200 transition">
+              Refresh
+            </button>
+          </div>
+          <div id="application-status" class="space-y-3 max-h-64 overflow-y-auto">
+            <!-- Application status will be loaded here -->
+            <div class="text-center py-4 text-gray-500">
+              No applications found. Submit an application to see its status.
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-6 text-center">
+        <button id="logout-btn" class="w-full max-w-xs mx-auto bg-red-500 text-white py-3 rounded hover:bg-red-600 transition">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Check if student is already registered
+    function checkStudentStatus() {
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      
+      // If no students exist, show registration form
+      if (students.length === 0) {
+        showSection('registration-section');
+        showToast('Welcome! Please register to continue.', 'info');
+        return;
+      }
+      
+      // Check if current student is logged in
+      const currentStudent = localStorage.getItem('currentStudent');
+      if (currentStudent) {
+        const student = JSON.parse(currentStudent);
+        showWelcomeScreen(student);
+      } else {
+        // Show login form for returning students
+        showSection('login-section');
+      }
+    }
+
+    // Show specific section and hide others
+    function showSection(sectionId) {
+      const sections = ['registration-section', 'login-section', 'welcome-section'];
+      sections.forEach(id => {
+        const element = document.getElementById(id);
+        if (id === sectionId) {
+          element.classList.remove('hidden');
+          element.classList.add('fade-in');
+        } else {
+          element.classList.add('hidden');
+          element.classList.remove('fade-in');
+        }
+      });
+    }
+
+    // Show welcome screen with student info
+    function showWelcomeScreen(student) {
+      document.getElementById('student-name').textContent = student.name;
+      document.getElementById('student-rollno').textContent = student.rollno;
+      showSection('welcome-section');
+      loadApplicationStatus(student.username);
+    }
+
+    // Load application status for the current student
+    function loadApplicationStatus(studentUsername) {
+      const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+      const statusContainer = document.getElementById('application-status');
+      
+      // Filter applications for the current student
+      const studentApplications = applications.filter(app => app.studentUsername === studentUsername);
+      
+      if (studentApplications.length === 0) {
+        statusContainer.innerHTML = '<div class="text-center py-4 text-gray-500">No applications found. Submit an application to see its status.</div>';
+        return;
+      }
+      
+      // Sort applications by submission date (newest first)
+      studentApplications.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+      
+      // Display applications
+      statusContainer.innerHTML = studentApplications.map(app => `
+        <div class="bg-white p-3 rounded border border-gray-200">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <h4 class="font-medium">${app.type} Application</h4>
+              <p class="text-xs text-gray-500">Submitted: ${new Date(app.submittedAt).toLocaleDateString()}</p>
+            </div>
+            <span class="status-${app.status}">${app.status.charAt(0).toUpperCase() + app.status.slice(1)}</span>
+          </div>
+          <div class="text-sm text-gray-600">
+            ${app.type === 'Leave' ? `
+              <p>Out: ${app.outDate} | In: ${app.inDate}</p>
+              <p class="truncate">Reason: ${app.reason}</p>
+            ` : ''}
+            ${app.type === 'Get Pass' ? `
+              <p>Date: ${app.date} | Time: ${app.outTime}</p>
+              <p class="truncate">Reason: ${app.reason}</p>
+            ` : ''}
+            ${app.type === 'Bonafide' ? `
+              <p>Class: ${app.class}</p>
+              <p>Birth Date: ${app.birthDate}</p>
+            ` : ''}
+          </div>
+          ${app.currentApprover && app.status === 'pending' ? `
+            <p class="text-xs text-gray-500 mt-2">Currently with: ${getApproverName(app.currentApprover)}</p>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+    
+    // Get approver name for display
+    function getApproverName(approver) {
+      const approverNames = {
+        'classTeacher': 'Class Teacher',
+        'hod': 'HOD',
+        'principal': 'Principal'
+      };
+      return approverNames[approver] || approver;
+    }
+
+    // Save student registration data
+    function registerStudent(studentData) {
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      
+      // Check if username already exists
+      const usernameExists = students.some(s => s.username === studentData.username);
+      if (usernameExists) {
+        showToast('Username already exists. Please choose another.', 'error');
+        return false;
+      }
+      
+      // Check if roll number already exists
+      const rollnoExists = students.some(s => s.rollno === studentData.rollno);
+      if (rollnoExists) {
+        showToast('Roll number already registered.', 'error');
+        return false;
+      }
+      
+      // Add registration date
+      studentData.registrationDate = new Date().toISOString();
+      studentData.lastLogin = new Date().toISOString();
+      
+      // Add to students array
+      students.push(studentData);
+      
+      // Save to localStorage
+      localStorage.setItem('students', JSON.stringify(students));
+      localStorage.setItem('currentStudent', JSON.stringify(studentData));
+      
+      return true;
+    }
+
+    // Verify student login
+    function verifyLogin(username, password) {
+      const students = JSON.parse(localStorage.getItem('students')) || [];
+      const student = students.find(s => s.username === username && s.password === password);
+      
+      if (student) {
+        // Update last login
+        student.lastLogin = new Date().toISOString();
+        localStorage.setItem('students', JSON.stringify(students));
+        localStorage.setItem('currentStudent', JSON.stringify(student));
+        return student;
+      }
+      
+      return null;
+    }
+
+    // Handle registration form submission
+    document.getElementById("registrationForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const name = document.getElementById("reg-name").value.trim();
+      const rollno = document.getElementById("reg-rollno").value.trim();
+      const email = document.getElementById("reg-email").value.trim();
+      const username = document.getElementById("reg-username").value.trim();
+      const password = document.getElementById("reg-password").value;
+      
+      if (name && rollno && email && username && password) {
+        // Register student
+        const success = registerStudent({ name, rollno, email, username, password });
+        
+        if (success) {
+          showWelcomeScreen({ name, rollno, username });
+          showToast('Registration successful!', 'success');
+        }
+      } else {
+        showToast('Please fill in all fields!', 'error');
+      }
+    });
+
+    // Handle login form submission
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const username = document.getElementById("login-username").value.trim();
+      const password = document.getElementById("login-password").value;
+      
+      if (username && password) {
+        // Verify login
+        const student = verifyLogin(username, password);
+        
+        if (student) {
+          showWelcomeScreen(student);
+          showToast('Login successful!', 'success');
+        } else {
+          showToast('Invalid username or password!', 'error');
+        }
+      } else {
+        showToast('Please fill in all fields!', 'error');
+      }
+    });
+
+    // Handle logout
+    document.getElementById('logout-btn').addEventListener('click', function() {
+      localStorage.removeItem('currentStudent');
+      showSection('login-section');
+      document.getElementById("loginForm").reset();
+      showToast('Logged out successfully!', 'success');
+    });
+    
+    // Handle refresh status button
+    document.getElementById('refresh-status').addEventListener('click', function() {
+      const currentStudent = JSON.parse(localStorage.getItem('currentStudent') || '{}');
+      if (currentStudent.username) {
+        loadApplicationStatus(currentStudent.username);
+        showToast('Status updated!', 'info');
+      }
+    });
+
+    // Toggle between registration and login
+    document.getElementById('show-login-from-reg').addEventListener('click', function(e) {
+      e.preventDefault();
+      showSection('login-section');
+    });
+
+    document.getElementById('show-reg-from-login').addEventListener('click', function(e) {
+      e.preventDefault();
+      showSection('registration-section');
+    });
+
+    // Check student status on page load
+    document.addEventListener('DOMContentLoaded', checkStudentStatus);
+  </script>
+
+</body>
+</html>

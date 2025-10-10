@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Pass Application</title>
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 4px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+    }
+    .toast.show {
+      transform: translateX(0);
+    }
+    .toast.success {
+      background-color: #10B981;
+    }
+    .toast.error {
+      background-color: #EF4444;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="flex justify-center items-center min-h-screen py-8">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+      <h2 class="text-2xl font-bold text-center text-indigo-600 mb-6">GET PASS</h2>
+
+      <form id="getpassForm">
+        <div class="mb-4">
+          <label for="date" class="block text-gray-700 font-medium mb-2">Date</label>
+          <input type="date" id="date" name="date" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
+        </div>
+        
+        <div class="mb-4">
+          <label for="fullName" class="block text-gray-700 font-medium mb-2">Full Name</label>
+          <input type="text" id="fullName" name="fullName" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Enter your full name" required>
+        </div>
+        
+        <div class="mb-4">
+          <label for="outTime" class="block text-gray-700 font-medium mb-2">Out Time</label>
+          <input type="time" id="outTime" name="outTime" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
+        </div>
+        
+        <div class="mb-4">
+          <label for="reason" class="block text-gray-700 font-medium mb-2">Reason</label>
+          <input type="text" id="reason" name="reason" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Enter reason" required>
+        </div>
+        
+        <div class="mb-6">
+          <label for="class" class="block text-gray-700 font-medium mb-2">Class</label>
+          <select id="class" name="class" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
+            <option value="" disabled selected>Select your class</option>
+            <optgroup label="Computer Engineering">
+              <option value="CM First Year">CM First Year</option>
+              <option value="CM Second Year">CM Second Year</option>
+              <option value="CM Third Year">CM Third Year</option>
+            </optgroup>
+            <optgroup label="Civil Engineering">
+              <option value="CE First Year">CE First Year</option>
+              <option value="CE Second Year">CE Second Year</option>
+              <option value="CE Third Year">CE Third Year</option>
+            </optgroup>
+            <optgroup label="Automobile Engineering">
+              <option value="AI First Year">AI First Year</option>
+              <option value="AI Second Year">AI Second Year</option>
+              <option value="AI Third Year">AI Third Year</option>
+            </optgroup>
+            <optgroup label="Mechanical Engineering">
+              <option value="ME First Year">ME First Year</option>
+              <option value="ME Second Year">ME Second Year</option>
+              <option value="ME Third Year">ME Third Year</option>
+            </optgroup>
+            <optgroup label="Electrical Engineering">
+              <option value="EE First Year">EE First Year</option>
+              <option value="EE Second Year">EE Second Year</option>
+              <option value="EE Third Year">EE Third Year</option>
+            </optgroup>
+            <optgroup label="Electronics Engineering">
+              <option value="EJ First Year">EJ First Year</option>
+              <option value="EJ Second Year">EJ Second Year</option>
+              <option value="EJ Third Year">EJ Third Year</option>
+            </optgroup>
+          </select>
+        </div>
+        
+        <div class="flex space-x-4">
+          <button type="button" onclick="window.history.back()" class="w-1/2 bg-gray-500 text-white py-2 rounded hover:bg-gray-600 transition duration-200">Cancel</button>
+          <button type="submit" class="w-1/2 bg-green-500 text-white py-2 rounded hover:bg-green-600 transition duration-200">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+      <div class="mt-3 text-center">
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+          <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mt-2">Success!</h3>
+        <div class="mt-2 px-7 py-3">
+          <p class="text-sm text-gray-500">Your get pass application has been submitted successfully and sent to Class Teacher.</p>
+        </div>
+        <div class="items-center px-4 py-3">
+          <button onclick="closeSuccessModal()" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    function showSuccessModal() {
+      document.getElementById('successModal').classList.remove('hidden');
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('successModal').classList.add('hidden');
+      window.location.href = 'student-portal.html';
+    }
+
+    document.getElementById('getpassForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Get current student info
+      const currentStudent = JSON.parse(localStorage.getItem('currentStudent') || '{}');
+      
+      // Get selected class
+      const selectedClass = document.getElementById('class').value;
+      
+      // Create application object
+      const application = {
+        id: Date.now(),
+        type: 'Get Pass',
+        date: document.getElementById('date').value,
+        fullName: document.getElementById('fullName').value,
+        outTime: document.getElementById('outTime').value,
+        reason: document.getElementById('reason').value,
+        class: selectedClass,
+        studentUsername: currentStudent.username,
+        studentName: currentStudent.name,
+        studentRollNo: currentStudent.rollno,
+        status: 'pending',
+        submittedAt: new Date().toISOString(),
+        approvedBy: [],
+        currentApprover: 'classTeacher'
+      };
+      
+      // Save to applications
+      const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+      applications.push(application);
+      localStorage.setItem('applications', JSON.stringify(applications));
+      
+      showSuccessModal();
+    });
+
+    // Set today's date as default
+    document.getElementById('date').valueAsDate = new Date();
+    
+    // Auto-fill student name if available
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentStudent = JSON.parse(localStorage.getItem('currentStudent') || '{}');
+      if (currentStudent.name) {
+        document.getElementById('fullName').value = currentStudent.name;
+      }
+    });
+  </script>
+</body>
+</html>

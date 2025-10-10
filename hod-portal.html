@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HOD Portal</title>
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 4px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+    }
+    .toast.show {
+      transform: translateX(0);
+    }
+    .toast.success {
+      background-color: #10B981;
+    }
+    .toast.error {
+      background-color: #EF4444;
+    }
+    .toast.info {
+      background-color: #3B82F6;
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+
+  <!-- LOGIN SECTION -->
+  <div id="login-section" class="flex justify-center items-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md fade-in">
+      <h2 class="text-2xl font-bold text-center text-indigo-600 mb-6">HOD Login</h2>
+
+      <form id="loginForm">
+        <div class="mb-4">
+          <label for="hod-department" class="block text-gray-700 font-medium mb-2">Select Your Department</label>
+          <select id="hod-department" name="hodDepartment" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
+            <option value="" disabled selected>Select your department</option>
+            <option value="CM">Computer Engineering (CM)</option>
+            <option value="CE">Civil Engineering (CE)</option>
+            <option value="AI">Automobile Engineering (AI)</option>
+            <option value="ME">Mechanical Engineering (ME)</option>
+            <option value="EE">Electrical Engineering (EE)</option>
+            <option value="EJ">Electronics Engineering (EJ)</option>
+          </select>
+        </div>
+        
+        <div class="mb-6">
+          <label for="login-password" class="block text-gray-700 font-medium mb-2">Password</label>
+          <input type="password" id="login-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Enter password" required>
+          <p class="text-xs text-gray-500 mt-1">Default password: YCIP@123</p>
+        </div>
+        
+        <button type="submit" class="w-full bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 transition duration-200">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- APPLICATIONS SECTION -->
+  <div id="applications-section" class="hidden">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-indigo-600">HOD Portal - <span id="department-display"></span></h1>
+        <div class="flex items-center space-x-4">
+          <span class="text-lg font-medium text-gray-700" id="current-department-display"></span>
+          <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+            Logout
+          </button>
+        </div>
+      </div>
+      
+      <!-- Year Filter -->
+      <div class="bg-white rounded-lg shadow-lg p-4 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-3">Filter by Year</h3>
+        <div class="flex space-x-2">
+          <button onclick="filterByYear('all')" class="year-filter bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition" data-year="all">
+            All Years
+          </button>
+          <button onclick="filterByYear('First Year')" class="year-filter bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition" data-year="First Year">
+            First Year
+          </button>
+          <button onclick="filterByYear('Second Year')" class="year-filter bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition" data-year="Second Year">
+            Second Year
+          </button>
+          <button onclick="filterByYear('Third Year')" class="year-filter bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition" data-year="Third Year">
+            Third Year
+          </button>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Student Applications</h2>
+        
+        <div id="applicationsList" class="space-y-4">
+          <!-- Applications will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let currentDepartment = '';
+    let currentYearFilter = 'all';
+    let allApplications = [];
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Check if HOD is already logged in
+    function checkHODStatus() {
+      const currentHOD = localStorage.getItem('currentHOD');
+      if (currentHOD) {
+        const hod = JSON.parse(currentHOD);
+        showApplicationsSection(hod);
+      }
+    }
+
+    // Show specific section and hide others
+    function showSection(sectionId) {
+      const sections = ['login-section', 'applications-section'];
+      sections.forEach(id => {
+        const element = document.getElementById(id);
+        if (id === sectionId) {
+          element.classList.remove('hidden');
+          if (id === 'login-section') {
+            element.classList.add('flex');
+          }
+        } else {
+          element.classList.add('hidden');
+          if (id === 'login-section') {
+            element.classList.remove('flex');
+          }
+        }
+      });
+    }
+
+    // Show applications section with HOD info
+    function showApplicationsSection(hod) {
+      currentDepartment = hod.department;
+      document.getElementById('department-display').textContent = getDepartmentFullName(hod.department);
+      document.getElementById('current-department-display').textContent = getDepartmentFullName(hod.department);
+      showSection('applications-section');
+      loadApplications();
+    }
+
+    // Get full department name
+    function getDepartmentFullName(deptCode) {
+      const departments = {
+        'CM': 'Computer Engineering',
+        'CE': 'Civil Engineering',
+        'AI': 'Automobile Engineering',
+        'ME': 'Mechanical Engineering',
+        'EE': 'Electrical Engineering',
+        'EJ': 'Electronics Engineering'
+      };
+      return departments[deptCode] || deptCode;
+    }
+
+    // Verify HOD login
+    function verifyLogin(department, password) {
+      const correctPassword = "YCIP@123";
+      
+      if (password === correctPassword && department) {
+        const hod = {
+          department: department,
+          loginTime: new Date().toISOString()
+        };
+        localStorage.setItem('currentHOD', JSON.stringify(hod));
+        return hod;
+      }
+      
+      return null;
+    }
+
+    // Load applications for the specific department
+    function loadApplications() {
+      const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+      
+      // Filter applications for this HOD's department and pending status
+      allApplications = applications.filter(app => 
+        app.currentApprover === 'hod' && 
+        app.status === 'pending' &&
+        app.class.startsWith(currentDepartment)
+      );
+      
+      displayApplications();
+    }
+
+    // Filter applications by year
+    function filterByYear(year) {
+      currentYearFilter = year;
+      
+      // Update active button styles
+      document.querySelectorAll('.year-filter').forEach(btn => {
+        if (btn.getAttribute('data-year') === year) {
+          btn.classList.remove('bg-gray-200', 'text-gray-700');
+          btn.classList.add('bg-indigo-500', 'text-white');
+        } else {
+          btn.classList.remove('bg-indigo-500', 'text-white');
+          btn.classList.add('bg-gray-200', 'text-gray-700');
+        }
+      });
+      
+      displayApplications();
+    }
+
+    // Display applications based on current filter
+    function displayApplications() {
+      let filteredApplications = allApplications;
+      
+      if (currentYearFilter !== 'all') {
+        filteredApplications = allApplications.filter(app => 
+          app.class.includes(currentYearFilter)
+        );
+      }
+      
+      const applicationsList = document.getElementById('applicationsList');
+      
+      if (filteredApplications.length === 0) {
+        const message = currentYearFilter === 'all' 
+          ? `No pending applications for ${getDepartmentFullName(currentDepartment)}.`
+          : `No pending applications for ${getDepartmentFullName(currentDepartment)} - ${currentYearFilter}.`;
+        applicationsList.innerHTML = `<p class="text-gray-500 text-center py-8">${message}</p>`;
+        return;
+      }
+      
+      applicationsList.innerHTML = filteredApplications.map(application => `
+        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <h3 class="font-semibold text-lg">${application.fullName}</h3>
+              <p class="text-sm text-gray-600">Roll No: ${application.studentRollNo || 'N/A'}</p>
+            </div>
+            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">${application.type}</span>
+          </div>
+          <p class="text-gray-600 mb-2"><strong>Reason:</strong> ${application.reason}</p>
+          <p class="text-gray-600 mb-2"><strong>Date:</strong> ${application.date}</p>
+          <p class="text-gray-600 mb-2"><strong>Class:</strong> ${application.class}</p>
+          ${application.outDate ? `<p class="text-gray-600 mb-2"><strong>Out Date:</strong> ${application.outDate}</p>` : ''}
+          ${application.inDate ? `<p class="text-gray-600 mb-2"><strong>In Date:</strong> ${application.inDate}</p>` : ''}
+          ${application.outTime ? `<p class="text-gray-600 mb-2"><strong>Out Time:</strong> ${application.outTime}</p>` : ''}
+          ${application.birthDate ? `<p class="text-gray-600 mb-2"><strong>Birth Date:</strong> ${application.birthDate}</p>` : ''}
+          ${application.feesEnrollmentNo ? `<p class="text-gray-600 mb-2"><strong>Enrollment No:</strong> ${application.feesEnrollmentNo}</p>` : ''}
+          <p class="text-gray-600 mb-4"><strong>Approved by:</strong> ${application.approvedBy.join(', ')}</p>
+          <div class="flex space-x-2 mt-4">
+            <button onclick="approveApplication(${application.id})" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+              Approve
+            </button>
+            <button onclick="rejectApplication(${application.id})" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+              Reject
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Approve application
+    function approveApplication(applicationId) {
+      const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+      const application = applications.find(app => app.id === applicationId);
+      
+      if (application) {
+        application.approvedBy.push('HOD');
+        application.currentApprover = 'principal';
+        application.status = 'pending';
+        
+        localStorage.setItem('applications', JSON.stringify(applications));
+        showToast('Application approved and sent to Principal');
+        
+        // Reload applications for current HOD's department
+        loadApplications();
+      }
+    }
+
+    // Reject application
+    function rejectApplication(applicationId) {
+      const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+      const application = applications.find(app => app.id === applicationId);
+      
+      if (application) {
+        application.status = 'rejected';
+        application.currentApprover = 'student';
+        
+        localStorage.setItem('applications', JSON.stringify(applications));
+        showToast('Application rejected');
+        
+        // Reload applications for current HOD's department
+        loadApplications();
+      }
+    }
+
+    // Handle login form submission
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const department = document.getElementById("hod-department").value;
+      const password = document.getElementById("login-password").value;
+      
+      if (department && password) {
+        // Verify login
+        const hod = verifyLogin(department, password);
+        
+        if (hod) {
+          showApplicationsSection(hod);
+          showToast('Login successful!', 'success');
+        } else {
+          showToast('Invalid department selection or password!', 'error');
+        }
+      } else {
+        showToast('Please select your department and enter password!', 'error');
+      }
+    });
+
+    // Handle logout
+    document.getElementById('logout-btn').addEventListener('click', function() {
+      localStorage.removeItem('currentHOD');
+      showSection('login-section');
+      document.getElementById("loginForm").reset();
+      showToast('Logged out successfully!', 'success');
+    });
+
+    // Check HOD status on page load
+    document.addEventListener('DOMContentLoaded', checkHODStatus);
+  </script>
+</body>
+</html>

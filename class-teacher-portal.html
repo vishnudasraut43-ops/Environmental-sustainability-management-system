@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Class Teacher Portal</title>
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 4px;
+      color: white;
+      font-weight: 500;
+      z-index: 1000;
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+    }
+    .toast.show {
+      transform: translateX(0);
+    }
+    .toast.success {
+      background-color: #10B981;
+    }
+    .toast.error {
+      background-color: #EF4444;
+    }
+    .toast.info {
+      background-color: #3B82F6;
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .tab-button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #f3f4f6;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-right: 5px;
+    }
+    .tab-button.active {
+      background-color: #4f46e5;
+      color: white;
+    }
+    .status-pending {
+      background-color: #FEF3C7;
+      color: #92400E;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .status-approved {
+      background-color: #D1FAE5;
+      color: #065F46;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .status-rejected {
+      background-color: #FEE2E2;
+      color: #991B1B;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+
+  <!-- LOGIN SECTION -->
+  <div id="login-section" class="flex justify-center items-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md fade-in">
+      <h2 class="text-2xl font-bold text-center text-indigo-600 mb-6">Class Teacher Login</h2>
+
+      <form id="loginForm">
+        <div class="mb-4">
+          <label for="teacher-class" class="block text-gray-700 font-medium mb-2">Select Your Class</label>
+          <select id="teacher-class" name="teacherClass" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
+            <option value="" disabled selected>Select your class</option>
+            <optgroup label="Computer Engineering">
+              <option value="CM First Year">CM First Year</option>
+              <option value="CM Second Year">CM Second Year</option>
+              <option value="CM Third Year">CM Third Year</option>
+            </optgroup>
+            <optgroup label="Civil Engineering">
+              <option value="CE First Year">CE First Year</option>
+              <option value="CE Second Year">CE Second Year</option>
+              <option value="CE Third Year">CE Third Year</option>
+            </optgroup>
+            <optgroup label="Automobile Engineering">
+              <option value="AI First Year">AI First Year</option>
+              <option value="AI Second Year">AI Second Year</option>
+              <option value="AI Third Year">AI Third Year</option>
+            </optgroup>
+            <optgroup label="Mechanical Engineering">
+              <option value="ME First Year">ME First Year</option>
+              <option value="ME Second Year">ME Second Year</option>
+              <option value="ME Third Year">ME Third Year</option>
+            </optgroup>
+            <optgroup label="Electrical Engineering">
+              <option value="EE First Year">EE First Year</option>
+              <option value="EE Second Year">EE Second Year</option>
+              <option value="EE Third Year">EE Third Year</option>
+            </optgroup>
+            <optgroup label="Electronics Engineering">
+              <option value="EJ First Year">EJ First Year</option>
+              <option value="EJ Second Year">EJ Second Year</option>
+              <option value="EJ Third Year">EJ Third Year</option>
+            </optgroup>
+          </select>
+        </div>
+        
+        <div class="mb-6">
+          <label for="login-password" class="block text-gray-700 font-medium mb-2">Password</label>
+          <input type="password" id="login-password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Enter password" required>
+          <p class="text-xs text-gray-500 mt-1">Default password: YCIP@123</p>
+        </div>
+        
+        <button type="submit" class="w-full bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 transition duration-200">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- APPLICATIONS SECTION -->
+  <div id="applications-section" class="hidden">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-indigo-600">Class Teacher Portal</h1>
+        <div class="flex items-center space-x-4">
+          <span class="text-lg font-medium text-gray-700" id="current-class-display"></span>
+          <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+            Logout
+          </button>
+        </div>
+      </div>
+      
+      <!-- Tabs for Pending Applications and History -->
+      <div class="mb-6">
+        <button id="pending-tab" class="tab-button active">Pending Applications</button>
+        <button id="history-tab" class="tab-button">Application History</button>
+      </div>
+      
+      <!-- Pending Applications Section -->
+      <div id="pending-section" class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Pending Student Applications</h2>
+        
+        <div id="applicationsList" class="space-y-4">
+          <!-- Applications will be loaded here -->
+        </div>
+      </div>
+      
+      <!-- Application History Section -->
+      <div id="history-section" class="bg-white rounded-lg shadow-lg p-6 hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Application History</h2>
+        
+        <!-- Date Filter -->
+        <div class="mb-6">
+          <label for="history-date" class="block text-gray-700 font-medium mb-2">Filter by Date</label>
+          <input type="date" id="history-date" class="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400">
+          <button id="apply-filter" class="ml-2 bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition">
+            Apply Filter
+          </button>
+          <button id="clear-filter" class="ml-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
+            Clear Filter
+          </button>
+        </div>
+        
+        <div id="historyList" class="space-y-4">
+          <!-- History will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let currentTeacherClass = '';
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast ${type}`;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Check if teacher is already logged in
+    function checkTeacherStatus() {
+      const currentTeacher = localStorage.getItem('currentTeacher');
+      if (currentTeacher) {
+        const teacher = JSON.parse(currentTeacher);
+        showApplicationsSection(teacher);
+      }
+    }
+
+    // Show specific section and hide others
+    function showSection(sectionId) {
+      const sections = ['login-section', 'applications-section'];
+      sections.forEach(id => {
+        const element = document.getElementById(id);
+        if (id === sectionId) {
+          element.classList.remove('hidden');
+          if (id === 'login-section') {
+            element.classList.add('flex');
+          }
+        } else {
+          element.classList.add('hidden');
+          if (id === 'login-section') {
+            element.classList.remove('flex');
+          }
+        }
+      });
+    }
+
+    // Show applications section with teacher info
+    function showApplicationsSection(teacher) {
+      currentTeacherClass = teacher.teacherClass;
+      document.getElementById('current-class-display').textContent = teacher.teacherClass;
+      showSection('applications-section');
+      loadApplications(teacher.teacherClass);
+    }
+
+    // Verify teacher login
+    function verifyLogin(teacherClass, password) {
+      const correctPassword = "YCIP@123";
+      
+      if (password === correctPassword && teacherClass) {
+        const teacher = {
+          teacherClass: teacherClass,
+          loginTime: new Date().toISOString()
+        };
+        localStorage.setItem('currentTeacher', JSON.stringify(teacher));
+        return teacher;
+      }
+      
+      return null;
+    }
+
+    // Load applications for the specific class
+    function loadApplications(teacherClass) {
+      const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+      
+      // Filter applications for this teacher's class and pending status
+      const pendingApplications = applications.filter(app => 
+        app.currentApprover === 'classTeacher' && 
+        app.status === 'pending' &&
+        app.class === teacherClass
+      );
+      
+      const applicationsList = document.getElementById('applicationsList');
+      
+      if (pendingApplications.length === 0) {
+        applicationsList.innerHTML = '<p class="text-gray-500 text-center py-8">No pending applications for ' + teacherClass + '.</p>';
+        return;
+      }
+      
+      applicationsList.innerHTML = pendingApplications.map(application => `
+        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="font-semibold text-lg">${application.fullName}</h3>
+            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">${application.type}</span>
+          </div>
+          <p class="text-gray-600 mb-2"><strong>Reason:</strong> ${application.reason}</p>
+          <p class="text-gray-600 mb-2"><strong>Date:</strong> ${application.date}</p>
+          <p class="text-gray-600 mb-2"><strong>Class:</strong> ${application.class}</p>
+          ${application.outDate ? `<p class="text-gray-600 mb-2"><strong>Out Date:</strong> ${application.outDate}</p>` : ''}
+          ${application.inDate ? `<p class="text-gray-600 mb-2"><strong>In Date:</strong> ${application.inDate}</p>` : ''}
+          ${application.outTime ? `<p class="text-gray-600 mb-2"><strong>Out Time:</strong> ${application.outTime}</p>` : ''}
+          ${application.birthDate ? `<p class="text-gray-600 mb-2"><strong>Birth Date:</strong> ${application.birthDate}</p>` : ''}
+          ${application.feesEnrollmentNo ? `<p class="text-gray-600 mb-2"><strong>Enrollment No:</strong> ${application.feesEnrollmentNo}</p>` : ''}
+          <div class="flex space-x-2 mt-4">
+            <button onclick="approveApplication(${application.id})" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+              Approve
+            </button>
+            <button onclick="rejectApplication(${application.id})" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+              Reject
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Load application history for the specific class
+    function loadApplicationHistory(teacherClass, filterDate = null) {
+      const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+      
+      // Filter applications for this teacher's class (all statuses)
+      let classApplications = applications.filter(app => app.class === teacherClass);
+      
+      // Apply date filter if provided
+      if (filterDate) {
+        classApplications = classApplications.filter(app => app.date === filterDate);
+      }
+      
+      const historyList = document.getElementById('historyList');
+      
+      if (classApplications.length === 0) {
+        const message = filterDate 
+          ? `No applications found for ${teacherClass} on ${filterDate}.`
+          : `No applications found for ${teacherClass}.`;
+        historyList.innerHTML = `<p class="text-gray-500 text-center py-8">${message}</p>`;
+        return;
+      }
+      
+      // Sort applications by submission date (newest first)
+      classApplications.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+      
+      historyList.innerHTML = classApplications.map(application => `
+        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <h3 class="font-semibold text-lg">${application.fullName}</h3>
+              <p class="text-sm text-gray-500">Roll No: ${application.studentRollNo || 'N/A'}</p>
+            </div>
+            <div class="flex flex-col items-end">
+              <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded mb-1">${application.type}</span>
+              <span class="status-${application.status}">${application.status.charAt(0).toUpperCase() + application.status.slice(1)}</span>
+            </div>
+          </div>
+          <p class="text-gray-600 mb-2"><strong>Reason:</strong> ${application.reason}</p>
+          <p class="text-gray-600 mb-2"><strong>Date:</strong> ${application.date}</p>
+          <p class="text-gray-600 mb-2"><strong>Class:</strong> ${application.class}</p>
+          ${application.outDate ? `<p class="text-gray-600 mb-2"><strong>Out Date:</strong> ${application.outDate}</p>` : ''}
+          ${application.inDate ? `<p class="text-gray-600 mb-2"><strong>In Date:</strong> ${application.inDate}</p>` : ''}
+          ${application.outTime ? `<p class="text-gray-600 mb-2"><strong>Out Time:</strong> ${application.outTime}</p>` : ''}
+          ${application.birthDate ? `<p class="text-gray-600 mb-2"><strong>Birth Date:</strong> ${application.birthDate}</p>` : ''}
+          ${application.feesEnrollmentNo ? `<p class="text-gray-600 mb-2"><strong>Enrollment No:</strong> ${application.feesEnrollmentNo}</p>` : ''}
+          <p class="text-gray-600 mb-2"><strong>Submitted:</strong> ${new Date(application.submittedAt).toLocaleString()}</p>
+          ${application.approvedBy.length > 0 ? `<p class="text-gray-600 mb-2"><strong>Approved by:</strong> ${application.approvedBy.join(', ')}</p>` : ''}
+          ${application.rejectedBy ? `<p class="text-gray-600 mb-2"><strong>Rejected by:</strong> ${application.rejectedBy}</p>` : ''}
+        </div>
+      `).join('');
+    }
+
+    // Approve application
+    function approveApplication(applicationId) {
+      const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+      const application = applications.find(app => app.id === applicationId);
+      
+      if (application) {
+        application.approvedBy.push('Class Teacher');
+        application.currentApprover = 'hod';
+        application.status = 'pending';
+        
+        localStorage.setItem('applications', JSON.stringify(applications));
+        showToast('Application approved and sent to HOD');
+        
+        // Reload applications for current teacher's class
+        loadApplications(currentTeacherClass);
+      }
+    }
+
+    // Reject application
+    function rejectApplication(applicationId) {
+      const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+      const application = applications.find(app => app.id === applicationId);
+      
+      if (application) {
+        application.status = 'rejected';
+        application.currentApprover = 'student';
+        application.rejectedBy = 'Class Teacher';
+        
+        localStorage.setItem('applications', JSON.stringify(applications));
+        showToast('Application rejected');
+        
+        // Reload applications for current teacher's class
+        loadApplications(currentTeacherClass);
+      }
+    }
+
+    // Handle login form submission
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const teacherClass = document.getElementById("teacher-class").value;
+      const password = document.getElementById("login-password").value;
+      
+      if (teacherClass && password) {
+        // Verify login
+        const teacher = verifyLogin(teacherClass, password);
+        
+        if (teacher) {
+          showApplicationsSection(teacher);
+          showToast('Login successful!', 'success');
+        } else {
+          showToast('Invalid class or password!', 'error');
+        }
+      } else {
+        showToast('Please fill in all fields!', 'error');
+      }
+    });
+
+    // Handle logout
+    document.getElementById('logout-btn').addEventListener('click', function() {
+      localStorage.removeItem('currentTeacher');
+      showSection('login-section');
+      document.getElementById("loginForm").reset();
+      showToast('Logged out successfully!', 'success');
+    });
+
+    // Tab switching
+    document.getElementById('pending-tab').addEventListener('click', function() {
+      document.getElementById('pending-section').classList.remove('hidden');
+      document.getElementById('history-section').classList.add('hidden');
+      document.getElementById('pending-tab').classList.add('active');
+      document.getElementById('history-tab').classList.remove('active');
+    });
+
+    document.getElementById('history-tab').addEventListener('click', function() {
+      document.getElementById('pending-section').classList.add('hidden');
+      document.getElementById('history-section').classList.remove('hidden');
+      document.getElementById('pending-tab').classList.remove('active');
+      document.getElementById('history-tab').classList.add('active');
+      loadApplicationHistory(currentTeacherClass);
+    });
+
+    // Handle date filter
+    document.getElementById('apply-filter').addEventListener('click', function() {
+      const filterDate = document.getElementById('history-date').value;
+      if (filterDate) {
+        loadApplicationHistory(currentTeacherClass, filterDate);
+      } else {
+        showToast('Please select a date first', 'error');
+      }
+    });
+
+    // Handle clear filter
+    document.getElementById('clear-filter').addEventListener('click', function() {
+      document.getElementById('history-date').value = '';
+      loadApplicationHistory(currentTeacherClass);
+    });
+
+    // Check teacher status on page load
+    document.addEventListener('DOMContentLoaded', checkTeacherStatus);
+  </script>
+
+</body>
+</html>
